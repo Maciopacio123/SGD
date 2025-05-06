@@ -15,21 +15,3 @@ This repository contains six Pygame games that have been modified as part of a u
 
 The `screeny` directory contains screenshots of all the modifications implemented in each game.
 
-## Requirements
-
-The project requires Python and Pygame. You can install the required dependencies using:
-
-```
-pip install -r requirements.txt
-```
-
-## How to Run
-
-To run any of the games, use the Python interpreter:
-
-```
-python gamename.py
-```
-
-Where `gamename.py` is one of the modified game files listed above.
-

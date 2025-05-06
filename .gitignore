@@ -34,3 +34,11 @@ wheels/
 # OS specific files
 .DS_Store
 Thumbs.db venv/
+
+# Asset files
+*.png
+*.ogg
+*.ttf
+*.wav
+*.mp3
+screeny/

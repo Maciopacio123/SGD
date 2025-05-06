@@ -57,13 +57,20 @@ def runGame():
 
     # Start the apple in a random place.
     apple = getRandomLocation()
+    
+    paused = False
 
-    while True: # main game loop
+    while True: 
         for event in pygame.event.get(): # event handling loop
             if event.type == QUIT:
                 terminate()
             elif event.type == KEYDOWN:
-                if (event.key == K_LEFT or event.key == K_a) and direction != RIGHT:
+                if event.key == K_p:
+                    paused = not paused  # Toggle pause state
+                    if paused:
+                       
+                        showPauseScreen()
+                elif (event.key == K_LEFT or event.key == K_a) and direction != RIGHT:
                     direction = LEFT
                 elif (event.key == K_RIGHT or event.key == K_d) and direction != LEFT:
                     direction = RIGHT
@@ -73,6 +80,10 @@ def runGame():
                     direction = DOWN
                 elif event.key == K_ESCAPE:
                     terminate()
+        
+        if paused:
+            pygame.time.wait(100)  
+            continue
 
         # check if the worm has hit itself or the edge
         if wormCoords[HEAD]['x'] == -1 or wormCoords[HEAD]['x'] == CELLWIDTH or wormCoords[HEAD]['y'] == -1 or wormCoords[HEAD]['y'] == CELLHEIGHT:
@@ -214,6 +225,46 @@ def drawGrid():
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (x, 0), (x, WINDOWHEIGHT))
     for y in range(0, WINDOWHEIGHT, CELLSIZE): # draw horizontal lines
         pygame.draw.line(DISPLAYSURF, DARKGRAY, (0, y), (WINDOWWIDTH, y))
+
+
+def showPauseScreen():
+    
+    pauseOverlay = pygame.Surface((WINDOWWIDTH, WINDOWHEIGHT))
+    pauseOverlay.set_alpha(180)  # 70% opacity
+    pauseOverlay.fill(BLACK)
+    DISPLAYSURF.blit(pauseOverlay, (0, 0))
+    
+    pauseFont = pygame.font.Font('freesansbold.ttf', 60)
+    pauseSurf = pauseFont.render('PAUSED', True, WHITE)
+    pauseRect = pauseSurf.get_rect()
+    pauseRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    boxPadding = 20
+    boxRect = pygame.Rect(0, 0, pauseRect.width + boxPadding * 2, pauseRect.height + boxPadding * 2)
+    boxRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    pygame.draw.rect(DISPLAYSURF, BLACK, boxRect)
+    pygame.draw.rect(DISPLAYSURF, WHITE, boxRect, 4)  
+    DISPLAYSURF.blit(pauseSurf, pauseRect)
+    
+    instrFont = pygame.font.Font('freesansbold.ttf', 18)
+    instrSurf = instrFont.render('Press P to continue', True, WHITE)
+    instrRect = instrSurf.get_rect()
+    instrRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2 + 60)
+    DISPLAYSURF.blit(instrSurf, instrRect)
+    
+    pygame.display.update()
+    
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                terminate()
+            elif event.type == KEYDOWN:
+                if event.key == K_p:
+                    waiting = False
+                elif event.key == K_ESCAPE:
+                    terminate()
 
 
 if __name__ == '__main__':

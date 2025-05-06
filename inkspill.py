@@ -78,6 +78,7 @@ def main():
     mousey = 0
     mainBoard = generateRandomBoard(boardWidth, boardHeight, difficulty)
     life = maxLife
+    moveCount = 0  # Initialize move counter
     lastPaletteClicked = None
 
     while True: # main game loop
@@ -90,6 +91,7 @@ def main():
         drawBoard(mainBoard)
         drawLifeMeter(life)
         drawPalettes()
+        drawMoveCounter(moveCount)  # Draw the move counter
 
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
@@ -116,6 +118,7 @@ def main():
             lastPaletteClicked = paletteClicked
             floodAnimation(mainBoard, paletteClicked)
             life -= 1
+            moveCount += 1  # Increment the move counter
 
             resetGame = False
             if hasWon(mainBoard):
@@ -137,6 +140,7 @@ def main():
             # start a new game
             mainBoard = generateRandomBoard(boardWidth, boardHeight, difficulty)
             life = maxLife
+            moveCount = 0  # Reset the move counter
             lastPaletteClicked = None
 
         pygame.display.update()
@@ -430,6 +434,22 @@ def leftTopPixelCoordOfBox(boxx, boxy):
     xmargin = int((WINDOWWIDTH - (boardWidth * boxSize)) / 2)
     ymargin = int((WINDOWHEIGHT - (boardHeight * boxSize)) / 2)
     return (boxx * boxSize + xmargin, boxy * boxSize + ymargin)
+
+
+def drawMoveCounter(moveCount):
+    # Draw the move counter in the top-left corner
+    moveFont = pygame.font.Font('freesansbold.ttf', 20)
+    moveSurf = moveFont.render('Moves: %s' % (moveCount), True, BLACK)
+    moveRect = moveSurf.get_rect()
+    moveRect.topleft = (50, 20)
+    
+    # Draw a background behind the text for better visibility
+    bgRect = pygame.Rect(moveRect.left - 5, moveRect.top - 5, 
+                         moveRect.width + 10, moveRect.height + 10)
+    pygame.draw.rect(DISPLAYSURF, WHITE, bgRect)
+    pygame.draw.rect(DISPLAYSURF, BLACK, bgRect, 1)  # Black border
+    
+    DISPLAYSURF.blit(moveSurf, moveRect)
 
 
 if __name__ == '__main__':

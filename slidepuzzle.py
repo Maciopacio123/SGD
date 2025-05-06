@@ -57,6 +57,7 @@ def main():
     mainBoard, solutionSeq = generateNewPuzzle(80)
     SOLVEDBOARD = getStartingBoard() # a solved board is the same as the board in a start state.
     allMoves = [] # list of moves made from the solved configuration
+    moveCount = 0 # counter for tracking player moves
 
     while True: # main game loop
         slideTo = None # the direction, if any, a tile should slide
@@ -64,7 +65,7 @@ def main():
         if mainBoard == SOLVEDBOARD:
             msg = 'Solved!'
 
-        drawBoard(mainBoard, msg)
+        drawBoard(mainBoard, msg, moveCount)
 
         checkForQuit()
         for event in pygame.event.get(): # event handling loop
@@ -72,16 +73,18 @@ def main():
                 spotx, spoty = getSpotClicked(mainBoard, event.pos[0], event.pos[1])
 
                 if (spotx, spoty) == (None, None):
-                    # check if the user clicked on an option button
                     if RESET_RECT.collidepoint(event.pos):
                         resetAnimation(mainBoard, allMoves) # clicked on Reset button
                         allMoves = []
+                        moveCount = 0  
                     elif NEW_RECT.collidepoint(event.pos):
                         mainBoard, solutionSeq = generateNewPuzzle(80) # clicked on New Game button
                         allMoves = []
+                        moveCount = 0  
                     elif SOLVE_RECT.collidepoint(event.pos):
                         resetAnimation(mainBoard, solutionSeq + allMoves) # clicked on Solve button
                         allMoves = []
+                        moveCount = 0 
                 else:
                     # check if the clicked tile was next to the blank spot
 
@@ -107,9 +110,10 @@ def main():
                     slideTo = DOWN
 
         if slideTo:
-            slideAnimation(mainBoard, slideTo, 'Click tile or press arrow keys to slide.', 8) # show slide on screen
+            slideAnimation(mainBoard, slideTo, 'Click tile or press arrow keys to slide.', 8, moveCount) 
             makeMove(mainBoard, slideTo)
             allMoves.append(slideTo) # record the slide
+            moveCount += 1  
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -230,11 +234,16 @@ def makeText(text, color, bgcolor, top, left):
     return (textSurf, textRect)
 
 
-def drawBoard(board, message):
+def drawBoard(board, message, moveCount=None):
     DISPLAYSURF.fill(BGCOLOR)
     if message:
         textSurf, textRect = makeText(message, MESSAGECOLOR, BGCOLOR, 5, 5)
         DISPLAYSURF.blit(textSurf, textRect)
+    
+    if moveCount is not None:
+        moveText = f'Moves: {moveCount}'
+        moveSurf, moveRect = makeText(moveText, MESSAGECOLOR, BGCOLOR, 5, 30)
+        DISPLAYSURF.blit(moveSurf, moveRect)
 
     for tilex in range(len(board)):
         for tiley in range(len(board[0])):
@@ -251,7 +260,7 @@ def drawBoard(board, message):
     DISPLAYSURF.blit(SOLVE_SURF, SOLVE_RECT)
 
 
-def slideAnimation(board, direction, message, animationSpeed):
+def slideAnimation(board, direction, message, animationSpeed, moveCount=None):
     # Note: This function does not check if the move is valid.
 
     blankx, blanky = getBlankPosition(board)
@@ -269,7 +278,7 @@ def slideAnimation(board, direction, message, animationSpeed):
         movey = blanky
 
     # prepare the base surface
-    drawBoard(board, message)
+    drawBoard(board, message, moveCount)
     baseSurf = DISPLAYSURF.copy()
     # draw a blank space over the moving tile on the baseSurf Surface.
     moveLeft, moveTop = getLeftTopOfTile(movex, movey)

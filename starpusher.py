@@ -3,7 +3,7 @@
 
 
 
-import random, sys, copy, os, pygame
+import random, sys, copy, os, pygame, math
 from pygame.locals import *
 
 FPS = 30 # frames per second to update the screen
@@ -143,6 +143,10 @@ def runLevel(levels, levelNum):
     cameraDown = False
     cameraLeft = False
     cameraRight = False
+    
+    levelCompleteMsgDisplayed = False
+    levelCompleteStartTime = 0
+    totalWaitTime = 3000  
 
     while True: # main game loop
         # Reset these variables:
@@ -218,6 +222,8 @@ def runLevel(levels, levelNum):
                 # level is solved, we should show the "Solved!" image.
                 levelIsComplete = True
                 keyPressed = False
+                levelCompleteMsgDisplayed = True
+                levelCompleteStartTime = pygame.time.get_ticks()
 
         DISPLAYSURF.fill(BGCOLOR)
 
@@ -248,16 +254,45 @@ def runLevel(levels, levelNum):
         DISPLAYSURF.blit(stepSurf, stepRect)
 
         if levelIsComplete:
-            # is solved, show the "Solved!" image until the player
-            # has pressed a key.
-            solvedRect = IMAGESDICT['solved'].get_rect()
-            solvedRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT)
-            DISPLAYSURF.blit(IMAGESDICT['solved'], solvedRect)
+            if levelCompleteMsgDisplayed:
+                currentTime = pygame.time.get_ticks()
+                elapsedTime = currentTime - levelCompleteStartTime
+                remainingTime = max(0, totalWaitTime - elapsedTime)
+                remainingSeconds = math.ceil(remainingTime / 1000)
+                
+                GREEN_BG = (0, 128, 0) 
+                
+                levelCompleteFont = pygame.font.Font('freesansbold.ttf', 48)
+                levelCompleteSurf = levelCompleteFont.render('LEVEL COMPLETE!', True, WHITE)
+                levelCompleteRect = levelCompleteSurf.get_rect()
+                levelCompleteRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT - 50)
+                
+                boxPadding = 20
+                boxRect = pygame.Rect(0, 0, levelCompleteRect.width + boxPadding * 2, levelCompleteRect.height + boxPadding * 2)
+                boxRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT - 50)
+                
+                pygame.draw.rect(DISPLAYSURF, GREEN_BG, boxRect)
+                pygame.draw.rect(DISPLAYSURF, WHITE, boxRect, 4)
+                DISPLAYSURF.blit(levelCompleteSurf, levelCompleteRect)
+                
+                countdownFont = pygame.font.Font('freesansbold.ttf', 72)
+                countdownSurf = countdownFont.render(str(remainingSeconds), True, WHITE)
+                countdownRect = countdownSurf.get_rect()
+                countdownRect.center = (HALF_WINWIDTH, HALF_WINHEIGHT + 50)
+                
+                cdBoxPadding = 20
+                cdBoxRect = pygame.Rect(0, 0, countdownRect.width + cdBoxPadding * 2, countdownRect.height + cdBoxPadding * 2)
+                cdBoxRect.center = countdownRect.center
+                
+                pygame.draw.rect(DISPLAYSURF, GREEN_BG, cdBoxRect)
+                pygame.draw.rect(DISPLAYSURF, WHITE, cdBoxRect, 4)
+                DISPLAYSURF.blit(countdownSurf, countdownRect)
+                
+                if elapsedTime >= totalWaitTime:
+                    return 'solved'
+            
 
-            if keyPressed:
-                return 'solved'
-
-        pygame.display.update() # draw DISPLAYSURF to the screen.
+        pygame.display.update() 
         FPSCLOCK.tick()
 
 

@@ -219,6 +219,16 @@ def gameOverAnimation(color=WHITE, animationSpeed=50):
     BEEP3.play()
     BEEP4.play()
     r, g, b = color
+    
+    gameOverFont = pygame.font.Font('freesansbold.ttf', 50)
+    gameOverSurf = gameOverFont.render('GAME OVER', True, RED)
+    gameOverRect = gameOverSurf.get_rect()
+    gameOverRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
+    boxPadding = 20
+    boxRect = pygame.Rect(0, 0, gameOverRect.width + boxPadding * 2, gameOverRect.height + boxPadding * 2)
+    boxRect.center = (WINDOWWIDTH // 2, WINDOWHEIGHT // 2)
+    
     for i in range(3): # do the flash 3 times
         for start, end, step in ((0, 255, 1), (255, 0, -1)):
             # The first iteration in this loop sets the following for loop
@@ -230,8 +240,14 @@ def gameOverAnimation(color=WHITE, animationSpeed=50):
                 DISPLAYSURF.blit(origSurf, (0, 0))
                 DISPLAYSURF.blit(flashSurf, (0, 0))
                 drawButtons()
+                
+                pygame.draw.rect(DISPLAYSURF, BLACK, boxRect)
+                pygame.draw.rect(DISPLAYSURF, WHITE, boxRect, 4)  # White border
+                DISPLAYSURF.blit(gameOverSurf, gameOverRect)
                 pygame.display.update()
                 FPSCLOCK.tick(FPS)
+    
+    pygame.time.wait(1000)
 
 
 
